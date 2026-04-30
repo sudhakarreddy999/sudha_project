@@ -94,12 +94,12 @@ def generate_prompt():
         # Call Google Gemini API (gemini-2.5-flash) using REST
         url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}"
         
+        # Combine system instruction with user prompt in the message
+        full_prompt = f"{system_prompt}\n\n{user_prompt}"
+        
         payload = {
-            "systemInstruction": {
-                "parts": [{"text": system_prompt}]
-            },
             "contents": [{
-                "parts": [{"text": user_prompt}]
+                "parts": [{"text": full_prompt}]
             }],
             "generationConfig": {
                 "temperature": 0.9,
