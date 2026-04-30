@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: sudha-project
+    env: python
+    plan: free
+    branch: main
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: MONGODB_URI
+        sync: false
+      - key: FLASK_DEBUG
+        value: "false"
