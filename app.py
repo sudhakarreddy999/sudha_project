@@ -20,7 +20,6 @@ def index():
 
 # Environment variables
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-print(f"DEBUG: Loaded GEMINI_API_KEY = {GEMINI_API_KEY[:30]}..." if GEMINI_API_KEY else "DEBUG: GEMINI_API_KEY is None")
 MONGODB_URI = os.getenv("MONGODB_URI", "mongodb://127.0.0.1:27017/")
 HISTORY_FILE = os.getenv("HISTORY_FILE", "history.json")
 
@@ -62,8 +61,6 @@ except Exception as e:
 
 @app.route('/api/generate-prompt', methods=['POST'])
 def generate_prompt():
-    print(f"DEBUG: generate_prompt endpoint called")
-    print(f"DEBUG: Current GEMINI_API_KEY = {GEMINI_API_KEY[:30]}..." if GEMINI_API_KEY else "DEBUG: GEMINI_API_KEY is None")
     data = request.json
     
     if not data:
