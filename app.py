@@ -8,7 +8,7 @@ from pymongo import MongoClient
 from datetime import datetime, timezone
 
 # Load environment variables
-load_dotenv()
+load_dotenv(override=True)
 
 app = Flask(__name__, static_folder='.', static_url_path='')
 # Allow CORS for all domains so the frontend can hit it
@@ -20,6 +20,7 @@ def index():
 
 # Environment variables
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+print(f"DEBUG: Loaded GEMINI_API_KEY = {GEMINI_API_KEY[:30]}..." if GEMINI_API_KEY else "DEBUG: GEMINI_API_KEY is None")
 MONGODB_URI = os.getenv("MONGODB_URI", "mongodb://127.0.0.1:27017/")
 HISTORY_FILE = os.getenv("HISTORY_FILE", "history.json")
 
