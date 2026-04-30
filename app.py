@@ -62,6 +62,8 @@ except Exception as e:
 
 @app.route('/api/generate-prompt', methods=['POST'])
 def generate_prompt():
+    print(f"DEBUG: generate_prompt endpoint called")
+    print(f"DEBUG: Current GEMINI_API_KEY = {GEMINI_API_KEY[:30]}..." if GEMINI_API_KEY else "DEBUG: GEMINI_API_KEY is None")
     data = request.json
     
     if not data:
