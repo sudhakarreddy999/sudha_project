@@ -1,4 +1,5 @@
 import os
+import json
 import requests
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -20,6 +21,29 @@ def index():
 # Environment variables
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 MONGODB_URI = os.getenv("MONGODB_URI", "mongodb://127.0.0.1:27017/")
+HISTORY_FILE = os.getenv("HISTORY_FILE", "history.json")
+
+# History helpers for when MongoDB is unavailable
+
+def load_local_history():
+    try:
+        if os.path.exists(HISTORY_FILE):
+            with open(HISTORY_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+    except Exception as e:
+        print(f"Warning: Could not load local history: {e}")
+    return []
+
+
+def save_local_history(prompt_doc):
+    try:
+        history = load_local_history()
+        history.insert(0, prompt_doc)
+        history = history[:20]
+        with open(HISTORY_FILE, "w", encoding="utf-8") as f:
+            json.dump(history, f, default=str, indent=2)
+    except Exception as e:
+        print(f"Warning: Could not save local history: {e}")
 
 # Setup MongoDB
 try:
@@ -89,15 +113,18 @@ def generate_prompt():
         result = response.json()
         generated_text = result["candidates"][0]["content"]["parts"][0]["text"].strip()
         
-        # Save to database
+        prompt_doc = {
+            "theme": theme,
+            "style": style,
+            "prompt": generated_text,
+            "timestamp": datetime.now(timezone.utc)
+        }
+
         if prompts_collection is not None:
-            prompt_doc = {
-                "theme": theme,
-                "style": style,
-                "prompt": generated_text,
-                "timestamp": datetime.now(timezone.utc)
-            }
             prompts_collection.insert_one(prompt_doc)
+        else:
+            save_local_history(prompt_doc)
+            print("Info: Saved prompt locally because MongoDB is unavailable.")
             
         return jsonify({"prompt": generated_text}), 200
         
@@ -108,7 +135,8 @@ def generate_prompt():
 @app.route('/api/history', methods=['GET'])
 def get_history():
     if prompts_collection is None:
-        return jsonify({"error": "Database not connected", "history": []}), 503
+        history = load_local_history()
+        return jsonify({"history": history}), 200
         
     try:
         # Get the 20 most recent prompts
